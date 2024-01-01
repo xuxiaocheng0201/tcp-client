@@ -16,7 +16,7 @@ keywords = ["tcp", "network", "client"]
 [dependencies]
 lazy_static = "^1.4"
 async-trait = "~0.1"
-tokio = { version = "^1.35", features = ["net", "time"] }
+tokio = { version = "^1.35", features = ["macros", "net", "time"] }
 tcp-handler = "~0.5"
 serde = { version = "^1.0", features = ["derive"], optional = true }
 
@@ -24,4 +24,4 @@ serde = { version = "^1.0", features = ["derive"], optional = true }
 default = ["serde"]
 
 [dev-dependencies]
-tokio = { version = "^1.35", features = ["rt-multi-thread", "macros"]}
+tokio = { version = "^1.35", features = ["rt-multi-thread"]}

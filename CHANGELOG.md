@@ -7,8 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.0.1] - 2024-1-1
+
 ### Added
 
-* 实现功能路由。
-* 支持ctrl-c优雅关闭。
+* 实现连接Server。
 * 支持序列化配置。
