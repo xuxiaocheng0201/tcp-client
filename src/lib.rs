@@ -26,3 +26,14 @@ pub trait Client {
         start_client(self, addr).await
     }
 }
+
+pub async fn quickly_connect<A: ToSocketAddrs + Send>(identifier: &'static str, addr: A) -> Result<(TcpStream, AesCipher), StarterError> {
+    struct TempClient(&'static str);
+    impl Client for TempClient {
+        fn get_identifier(&self) -> &'static str {
+            self.0
+        }
+    }
+    let client = TempClient(identifier);
+    client.connect(addr).await
+}
