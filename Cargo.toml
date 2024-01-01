@@ -1,7 +1,15 @@
 [package]
 name = "tcp-client"
-version = "0.1.0"
+version = "0.0.1"
+authors = ["xuxiaocheng <2762267080@qq.com>"]
 edition = "2021"
+description = "Convenient TCP client. Based on tcp-handler"
+readme = "README.md"
+license = "(MIT OR Apache-2.0) AND BSD-3-Clause"
+repository = "https://github.com/xuxiaocheng0201/tcp-handler/tree/client"
+documentation = "https://docs.rs/tcp-client/"
+categories = ["network-programming"]
+keywords = ["tcp", "network", "client"]
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
@@ -9,12 +17,8 @@ edition = "2021"
 log = "~0.4"
 anyhow = "^1.0"
 async-trait = "~0.1"
-tokio = { version = "^1.35", features = ["net", "signal", "time"] }
-tcp-handler = "~0.4"
-serde = { version = "^1.0", features = ["derive"], optional = true }
-
-[features]
-default = ["serde"]
+tokio = { version = "^1.35", features = ["net", "time"] }
+tcp-handler = "~0.5"
 
 [dev-dependencies]
 env_logger = "~0.10"
