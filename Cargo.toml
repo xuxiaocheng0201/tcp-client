@@ -14,7 +14,6 @@ keywords = ["tcp", "network", "client"]
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-log = "~0.4"
 lazy_static = "^1.4"
 async-trait = "~0.1"
 tokio = { version = "^1.35", features = ["net", "time"] }
@@ -25,5 +24,4 @@ serde = { version = "^1.0", features = ["derive"], optional = true }
 default = ["serde"]
 
 [dev-dependencies]
-env_logger = "~0.10"
 tokio = { version = "^1.35", features = ["rt-multi-thread", "macros"]}
