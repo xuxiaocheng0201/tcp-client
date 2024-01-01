@@ -1,14 +1,16 @@
-pub fn add(left: usize, right: usize) -> usize {
-    left + right
-}
+pub mod configuration;
+mod network;
 
-#[cfg(test)]
-mod tests {
-    use super::*;
+use async_trait::async_trait;
+use tokio::net::{TcpStream, ToSocketAddrs};
 
-    #[test]
-    fn it_works() {
-        let result = add(2, 2);
-        assert_eq!(result, 4);
+#[async_trait]
+pub trait Client {
+    fn get_identifier(&self) -> &'static str;
+
+    fn get_version(&self) -> &'static str;
+
+    async fn connect<A: ToSocketAddrs>(addr: A) -> std::io::Result<TcpStream> {
+        let stream = TcpStream::connect(addr).await?;
     }
 }
