@@ -8,7 +8,7 @@ use tokio::io::{AsyncReadExt, AsyncWriteExt};
 use tokio::net::{TcpStream, ToSocketAddrs};
 use tokio::select;
 use tokio::time::sleep;
-use crate::Client;
+use crate::ClientFactory;
 use crate::configuration::get_connect_sec;
 
 #[inline]
@@ -28,7 +28,7 @@ pub async fn recv<R: AsyncReadExt + Unpin + Send>(stream: &mut R, cipher: AesCip
     }
 }
 
-pub(super) async fn start_client<C: Client + ?Sized, A: ToSocketAddrs + Send>(c: &C, addr: A) -> Result<(TcpStream, AesCipher), StarterError> {
+pub(super) async fn start_client<C: ClientFactory<T> + ?Sized, A: ToSocketAddrs + Send, T: From<(TcpStream, AesCipher)>>(c: &C, addr: A) -> Result<(TcpStream, AesCipher), StarterError> {
     let mut stream = TcpStream::connect(addr).await?;
     let connect_sec = get_connect_sec();
     let cipher = select! {

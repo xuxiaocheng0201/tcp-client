@@ -15,25 +15,25 @@ use crate::network::start_client;
 pub use network::{send, recv};
 
 #[async_trait]
-pub trait Client {
+pub trait ClientFactory<C: From<(TcpStream, AesCipher)>> {
     fn get_identifier(&self) -> &'static str;
 
     fn get_version(&self) -> &'static str {
         env!("CARGO_PKG_VERSION", "You should define the version in the manifest or override this method.")
     }
 
-    async fn connect<A: ToSocketAddrs + Send>(&self, addr: A) -> Result<(TcpStream, AesCipher), StarterError> {
-        start_client(self, addr).await
+    async fn connect<A: ToSocketAddrs + Send>(&self, addr: A) -> Result<C, StarterError> {
+        start_client(self, addr).await.map(|c| c.into())
     }
 }
 
-pub async fn quickly_connect<A: ToSocketAddrs + Send>(identifier: &'static str, addr: A) -> Result<(TcpStream, AesCipher), StarterError> {
+pub async fn quickly_connect<A: ToSocketAddrs + Send, C: From<(TcpStream, AesCipher)>>(identifier: &'static str, addr: A) -> Result<C, StarterError> {
     struct TempClient(&'static str);
-    impl Client for TempClient {
+    impl ClientFactory<(TcpStream, AesCipher)> for TempClient {
         fn get_identifier(&self) -> &'static str {
             self.0
         }
     }
     let client = TempClient(identifier);
-    client.connect(addr).await
+    client.connect(addr).await.map(|c| c.into())
 }

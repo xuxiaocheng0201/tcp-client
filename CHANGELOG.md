@@ -7,12 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.0.3] - 2024-1-4
+
+### Added
+
+* 重命名为ClientFactory。
+* 更新依赖。
+
 ## [0.0.2] - 2024-1-1
 
 ### Added
 
 * 支持默认version。
-* 支持快捷连接
+* 支持快捷连接。
 
 ## [0.0.1] - 2024-1-1
 
