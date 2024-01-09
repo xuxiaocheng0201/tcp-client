@@ -20,22 +20,28 @@ pub use network::{send, recv};
 pub trait ClientFactory<C: From<(TcpStream, AesCipher)>> {
     fn get_identifier(&self) -> &'static str;
 
-    fn get_version(&self) -> &'static str {
-        env!("CARGO_PKG_VERSION", "You should define the version in the manifest or override this method.")
-    }
+    /// # Example
+    /// ```ignore
+    /// env!("CARGO_PKG_VERSION")
+    /// ```
+    fn get_version(&self) -> &'static str;
 
     async fn connect<A: ToSocketAddrs + Send>(&self, addr: A) -> Result<C, StarterError> {
         start_client(self, addr).await.map(|c| c.into())
     }
 }
 
-pub async fn quickly_connect<A: ToSocketAddrs + Send, C: From<(TcpStream, AesCipher)>>(identifier: &'static str, addr: A) -> Result<C, StarterError> {
-    struct TempClient(&'static str);
+pub async fn quickly_connect<A: ToSocketAddrs + Send, C: From<(TcpStream, AesCipher)>>(identifier: &'static str, version:&'static str, addr: A) -> Result<C, StarterError> {
+    struct TempClient(&'static str, &'static str);
     impl ClientFactory<(TcpStream, AesCipher)> for TempClient {
         fn get_identifier(&self) -> &'static str {
             self.0
         }
+
+        fn get_version(&self) -> &'static str {
+            self.1
+        }
     }
-    let client = TempClient(identifier);
+    let client = TempClient(identifier, version);
     client.connect(addr).await.map(|c| c.into())
 }
