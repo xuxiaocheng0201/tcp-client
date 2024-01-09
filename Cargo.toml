@@ -1,6 +1,6 @@
 [package]
 name = "tcp-client"
-version = "0.0.3"
+version = "0.0.4"
 authors = ["xuxiaocheng <2762267080@qq.com>"]
 edition = "2021"
 description = "Convenient TCP client. Based on tcp-handler"
@@ -16,7 +16,7 @@ keywords = ["tcp", "network", "client"]
 [dependencies]
 lazy_static = "^1.4"
 async-trait = "~0.1"
-tokio = { version = "^1.35", features = ["macros", "net", "time"] }
+tokio = { version = "^1.35", features = ["macros", "net", "time", "sync"] }
 tcp-handler = "~0.5"
 serde = { version = "^1.0", features = ["derive"], optional = true }
 

@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.0.4] - 2024-1-9
+
 ### Added
 
 * 添加MutableCipher和ClientBase，简化收发消息逻辑。
