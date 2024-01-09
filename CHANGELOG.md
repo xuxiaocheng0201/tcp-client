@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+* 修复check_func中处理响应格式错误问题。
+* 使用timeout，优化性能。
+
 ## [0.0.5] - 2024-1-9
 
 ### Changed

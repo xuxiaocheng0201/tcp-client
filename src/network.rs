@@ -31,6 +31,9 @@ pub(super) async fn start_client<C: ClientFactory<T> + ?Sized, A: ToSocketAddrs 
     let cipher = timeout(Duration::from_secs(connect_sec), async {
         let init = client_init(&mut stream, c.get_identifier(), c.get_version()).await;
         client_start(&mut stream, init).await
-    }).await.map_err(|_| Error::new(ErrorKind::TimedOut, format!("Connect timeout {}, {} sec.", stream.peer_addr()?, connect_sec)))??;
+    }).await.map_err(|_| {
+        let addr = match stream.peer_addr() { Ok(a) => a, Err(e) => return e };
+        Error::new(ErrorKind::TimedOut, format!("Connect timeout {}, {} sec.", addr, connect_sec))
+    })??;
     Ok((stream, cipher))
 }
