@@ -6,8 +6,7 @@ use tcp_handler::compress_encrypt::{client_init, client_start};
 use tcp_handler::flate2::Compression;
 use tokio::io::{AsyncReadExt, AsyncWriteExt};
 use tokio::net::{TcpStream, ToSocketAddrs};
-use tokio::select;
-use tokio::time::sleep;
+use tokio::time::timeout;
 use crate::ClientFactory;
 use crate::configuration::get_connect_sec;
 
@@ -17,12 +16,10 @@ pub async fn send<W: AsyncWriteExt + Unpin + Send, B: Buf>(stream: &mut W, messa
 }
 
 #[inline]
-pub async fn recv<R: AsyncReadExt + Unpin + Send>(stream: &mut R, cipher: AesCipher, timeout: Option<Duration>) -> Result<(BytesMut, AesCipher), PacketError> {
-    if let Some(time) = timeout {
-        select! {
-            c = tcp_handler::compress_encrypt::recv(stream, cipher) => c,
-            _ = sleep(time) => Err(PacketError::IO(Error::new(ErrorKind::TimedOut, format!("Recv timeout: {:?}", time)))),
-        }
+pub async fn recv<R: AsyncReadExt + Unpin + Send>(stream: &mut R, cipher: AesCipher, time: Option<Duration>) -> Result<(BytesMut, AesCipher), PacketError> {
+    if let Some(time) = time {
+        timeout(time, tcp_handler::compress_encrypt::recv(stream, cipher)).await
+            .map_err(|_| PacketError::IO(Error::new(ErrorKind::TimedOut, format!("Recv timeout: {:?}", time))))?
     } else {
         tcp_handler::compress_encrypt::recv(stream, cipher).await
     }
@@ -31,14 +28,9 @@ pub async fn recv<R: AsyncReadExt + Unpin + Send>(stream: &mut R, cipher: AesCip
 pub(super) async fn start_client<C: ClientFactory<T> + ?Sized, A: ToSocketAddrs + Send, T: From<(TcpStream, AesCipher)>>(c: &C, addr: A) -> Result<(TcpStream, AesCipher), StarterError> {
     let mut stream = TcpStream::connect(addr).await?;
     let connect_sec = get_connect_sec();
-    let cipher = select! {
-        c = async {
-            let init = client_init(&mut stream, c.get_identifier(), c.get_version()).await;
-            client_start(&mut stream, init).await
-        } => { c }
-        _ = sleep(Duration::from_secs(connect_sec)) => {
-            Err(Error::new(ErrorKind::TimedOut, format!("Connect timeout {}, {} sec.", stream.peer_addr()?, connect_sec)).into())
-        }
-    }?;
+    let cipher = timeout(Duration::from_secs(connect_sec), async {
+        let init = client_init(&mut stream, c.get_identifier(), c.get_version()).await;
+        client_start(&mut stream, init).await
+    }).await.map_err(|_| Error::new(ErrorKind::TimedOut, format!("Connect timeout {}, {} sec.", stream.peer_addr()?, connect_sec)))??;
     Ok((stream, cipher))
 }

@@ -25,3 +25,6 @@ default = ["serde"]
 
 [dev-dependencies]
 tokio = { version = "^1.35", features = ["rt-multi-thread"]}
+
+[profile.dev.package.num-bigint-dig]
+opt-level = 3

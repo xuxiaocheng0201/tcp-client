@@ -22,6 +22,7 @@ impl MutableCipher {
         (cipher, guard)
     }
 
+    #[inline]
     pub(crate) fn reset(&self, mut guard: MutexGuard<Option<AesCipher>>, cipher: AesCipher) {
         (*guard).replace(cipher);
     }
