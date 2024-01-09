@@ -1,6 +1,6 @@
 [package]
 name = "tcp-client"
-version = "0.0.5"
+version = "0.0.6"
 authors = ["xuxiaocheng <2762267080@qq.com>"]
 edition = "2021"
 description = "Convenient TCP client. Based on tcp-handler"

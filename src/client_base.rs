@@ -4,7 +4,7 @@ use async_trait::async_trait;
 use tcp_handler::bytes::{Buf, BufMut, BytesMut};
 use tcp_handler::common::PacketError;
 use tcp_handler::flate2::Compression;
-use tcp_handler::variable_len_reader::{VariableReadable, VariableWritable};
+use tcp_handler::variable_len_reader::VariableWritable;
 use tcp_handler::variable_len_reader::asynchronous::AsyncVariableReadable;
 use tokio::io::{AsyncReadExt, AsyncWriteExt};
 use crate::mutable_cipher::MutableCipher;
@@ -42,7 +42,7 @@ pub trait ClientBase<R, W> where R: AsyncReadExt + Unpin + Send, W: AsyncWriteEx
         let mut request = BytesMut::new().writer();
         request.write_string(func)?;
         self.send(&mut request.into_inner()).await?;
-        if self.get_receiver().0.read_bool()? {
+        if self.get_receiver().0.read_bool().await? {
             Ok(())
         } else {
             Err(Error::new(ErrorKind::Other, format!("func is not available: {}", func)).into())

@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.0.6] - 2024-1-9
+
 ### Fixed
 
 * 修复check_func中处理响应格式错误问题。
