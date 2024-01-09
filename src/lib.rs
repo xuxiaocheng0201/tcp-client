@@ -1,5 +1,7 @@
 pub mod configuration;
 mod network;
+pub mod mutable_cipher;
+pub mod client_base;
 
 pub extern crate async_trait;
 pub extern crate tokio;
