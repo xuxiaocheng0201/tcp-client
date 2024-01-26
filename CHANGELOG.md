@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+* 支持发送超时。
+* 统一错误类型。
+* 优化文档。
+
+### Changed
+
+* 更新依赖。
+
 ## [0.0.6] - 2024-1-9
 
 ### Fixed
