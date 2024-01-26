@@ -1,3 +1,5 @@
+//! Some network utility functions.
+
 use std::time::Duration;
 use tcp_handler::bytes::{Buf, BytesMut};
 use tcp_handler::common::{AesCipher, PacketError, StarterError};

@@ -1,4 +1,5 @@
 #![doc = include_str!("../README.md")]
+#![warn(missing_docs)]
 #![cfg_attr(docsrs, feature(doc_cfg))]
 
 pub mod config;
@@ -64,6 +65,13 @@ pub trait ClientFactory<C: From<(TcpStream, AesCipher)>> {
     }
 }
 
+/// Conveniently define a client factory.
+/// # Example
+/// ```rust,ignore
+/// use tcp_client::client_factory;
+///
+/// client_factory!(MyClientFactory, MyClient, "MyTcpApplication");
+/// ```
 #[macro_export]
 macro_rules! client_factory {
     ($factory_vis: vis $factory: ident, $client_vis: vis $client: ident, $identifier: literal) => {

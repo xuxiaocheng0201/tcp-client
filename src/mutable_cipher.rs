@@ -5,6 +5,8 @@ use tcp_handler::common::AesCipher;
 use tokio::sync::{Mutex, MutexGuard};
 use crate::network::NetworkError;
 
+/// A wrapper for [`AesCipher`].
+/// Used in [`ClientBase`][crate::client_base::ClientBase].
 pub struct MutableCipher {
     cipher: Mutex<Option<AesCipher>>,
 }
@@ -20,14 +22,19 @@ impl Debug for MutableCipher {
 }
 
 impl MutableCipher {
-    pub fn new(cipher: AesCipher) -> MutableCipher {
-        MutableCipher {
+    /// Create a wrapped [`AesCipher`].
+    pub fn new(cipher: AesCipher) -> Self {
+        Self {
             cipher: Mutex::new(Some(cipher))
         }
     }
 
-    pub fn into_inner(self) -> AesCipher {
-        self.cipher.into_inner().unwrap()
+    /// Get the inner [`AesCipher`].
+    /// Not recommended to use.
+    ///
+    /// If it returns [`None`], it means the client is broken.
+    pub fn into_inner(self) -> Option<AesCipher> {
+        self.cipher.into_inner()
     }
 
     pub(crate) async fn get<'a>(&'a self) -> Result<(AesCipher, MutexGuard<Option<AesCipher>>), NetworkError> {

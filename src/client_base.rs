@@ -1,4 +1,4 @@
-/// The basic trait for client.
+//! The basic trait for client.
 
 use std::io::{Error, ErrorKind};
 use async_trait::async_trait;
