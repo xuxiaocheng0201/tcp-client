@@ -17,6 +17,7 @@ use crate::network::{NetworkError, start_client};
 /// The client factory to create clients.
 /// # Example
 /// ```rust,no_run
+/// use tcp_client::client_base::ClientBase;
 /// use tcp_client::client_factory;
 /// use tcp_client::ClientFactory;
 /// use tcp_client::network::NetworkError;
@@ -93,7 +94,7 @@ macro_rules! client_factory {
                 }
             }
         }
-        impl ClientBase<$crate::tokio::io::BufReader<$crate::tokio::net::tcp::OwnedReadHalf>, $crate::tokio::io::BufWriter<$crate::tokio::net::tcp::OwnedWriteHalf>> for $client {
+        impl $crate::client_base::ClientBase<$crate::tokio::io::BufReader<$crate::tokio::net::tcp::OwnedReadHalf>, $crate::tokio::io::BufWriter<$crate::tokio::net::tcp::OwnedWriteHalf>> for $client {
             fn get_receiver<'a>(&'a mut self) -> (&'a mut $crate::tokio::io::BufReader<$crate::tokio::net::tcp::OwnedReadHalf>, &$crate::mutable_cipher::MutableCipher) {
                 (&mut self.receiver, &self.cipher)
             }

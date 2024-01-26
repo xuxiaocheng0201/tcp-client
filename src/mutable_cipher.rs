@@ -1,11 +1,22 @@
 //! A wrapper for [`AesCipher`] to make it easier to update.
 
+use std::fmt::{Debug, Formatter};
 use tcp_handler::common::AesCipher;
 use tokio::sync::{Mutex, MutexGuard};
 use crate::network::NetworkError;
 
 pub struct MutableCipher {
     cipher: Mutex<Option<AesCipher>>,
+}
+
+impl Debug for MutableCipher {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("MutableCipher")
+            .field("cipher", self.cipher.try_lock()
+                .map_or_else(|_| &"<locked>",
+                             |inner| if (*inner).is_some() { &"<unlocked>" } else { &"<broken>" }))
+            .finish()
+    }
 }
 
 impl MutableCipher {

@@ -28,6 +28,7 @@ tcp-client = "~0.1"
 # 示例
 
 ```rust,no_run
+use tcp_client::client_base::ClientBase;
 use tcp_client::client_factory;
 use tcp_client::ClientFactory;
 use tcp_client::network::NetworkError;
