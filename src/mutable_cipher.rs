@@ -30,7 +30,6 @@ impl MutableCipher {
     }
 
     /// Get the inner [`AesCipher`].
-    /// Not recommended to use.
     ///
     /// If it returns [`None`], it means the client is broken.
     pub fn into_inner(self) -> Option<AesCipher> {

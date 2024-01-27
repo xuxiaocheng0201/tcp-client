@@ -36,8 +36,8 @@ use tcp_client::network::NetworkError;
 client_factory!(MyClientFactory, MyClient, "MyTcpApplication");
 
 impl MyClient {
-    // define your method here.
-    // example:
+    // 在此处定义你的方法
+    // 示例：
     async fn my_method(&mut self) -> Result<(), NetworkError> {
         self.check_func("my_method").await?;
         // ...

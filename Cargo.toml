@@ -22,6 +22,7 @@ serde = { version = "^1", features = ["derive"], optional = true }
 
 [features]
 default = []
+serde = ["dep:serde", "tcp-handler/serde"]
 
 [build-dependencies]
 reportme = "~0.2"
@@ -37,4 +38,4 @@ all-features = true
 rustdoc-args = ["--cfg", "docsrs"]
 
 [package.metadata.playground]
-features = ["full"]
+features = ["default", "serde"]

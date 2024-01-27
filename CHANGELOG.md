@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+* 修复feature错误。
+
+### Changed
+
+* 更新依赖。
+* 优化文档。
+* 简化内部mutable_cipher代码
+
+## [0.1.0] - 2024-1-26
+
 ### Added
 
 * 支持发送超时。
