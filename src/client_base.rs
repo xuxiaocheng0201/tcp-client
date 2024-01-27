@@ -27,20 +27,18 @@ pub trait ClientBase<R, W> where R: AsyncReadExt + Unpin + Send, W: AsyncWriteEx
     async fn send<B: Buf + Send>(&mut self, message: &mut B) -> Result<(), NetworkError> {
         let (sender, mutable_cipher) = self.get_sender();
         let (cipher, guard) = mutable_cipher.get().await?;
-        match send(sender, message, cipher, Compression::default()).await {
-            Ok(cipher) => { mutable_cipher.reset(guard, Some(cipher)); Ok(()) }
-            Err(e) => { mutable_cipher.reset(guard, None); Err(e) }
-        }
+        let cipher = send(sender, message, cipher, Compression::default()).await?;
+        mutable_cipher.reset(guard, cipher);
+        Ok(())
     }
 
     /// Recv a message from the server.
     async fn recv(&mut self) -> Result<BytesMut, NetworkError> {
         let (receiver, mutable_cipher) = self.get_receiver();
         let (cipher, guard) = mutable_cipher.get().await?;
-        match recv(receiver, cipher).await {
-            Ok((response, cipher)) => { mutable_cipher.reset(guard, Some(cipher)); Ok(response) }
-            Err(e) => { mutable_cipher.reset(guard, None); Err(e) }
-        }
+        let (response, cipher) = recv(receiver, cipher).await?;
+        mutable_cipher.reset(guard, cipher);
+        Ok(response)
     }
 
     /// A shortcut of send and recv message.
