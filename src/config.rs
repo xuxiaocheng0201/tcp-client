@@ -1,6 +1,6 @@
-//! Global configuration for this crate.
+//! Global configuration for this [`crate`].
 //!
-//! You may change the configuration by calling `set_config` function.
+//! You may change the configuration by calling [`set_config`] function.
 //!
 //! # Example
 //! ```rust
@@ -12,6 +12,8 @@
 //! ```
 
 use std::sync::RwLock;
+use std::time::Duration;
+use once_cell::sync::Lazy;
 
 /// Global configuration.
 ///
@@ -24,60 +26,60 @@ use std::sync::RwLock;
 /// # let _ = config;
 /// # }
 /// ```
-#[derive(Debug, Copy, Clone, Eq, PartialEq)]
-#[cfg_attr(feature = "serde", derive(serde::Deserialize, serde::Serialize))]
+#[derive(Debug, Copy, Clone, Eq, PartialEq, serde::Deserialize, serde::Serialize)]
+#[serde(default)]
 pub struct ClientConfig {
-    /// `connect_sec` is the timeout of connecting to the server.
-    /// Default value is `30`.
+    /// `connect_timeout` is the timeout of connecting to the server.
+    ///
+    /// The default value is `10s`.
     ///
     /// # Example
     /// ```rust
     /// use tcp_client::config::ClientConfig;
     ///
     /// # fn main() {
+    /// use std::time::Duration;
     /// let config = ClientConfig {
-    ///     connect_sec: 30,
+    ///     connect_timeout: Duration::from_secs(10),
     ///     ..ClientConfig::default()
     /// };
     /// # let _ = config;
     /// # }
     /// ```
-    pub connect_sec: u64,
+    pub connect_timeout: Duration,
 
-    /// `idle_sec` is the timeout of sending/receiving from the server.
-    /// This is only used after sending a packet.
-    /// Default value is `30`.
+    /// `receive_timeout` is the timeout of receiving from the server.
+    ///
+    /// The default value is `30s`.
     ///
     /// # Example
     /// ```rust
     /// use tcp_client::config::ClientConfig;
     ///
     /// # fn main() {
+    /// use std::time::Duration;
     /// let config = ClientConfig {
-    ///     idle_sec: 30,
+    ///     receive_timeout: Duration::from_secs(30),
     ///     ..ClientConfig::default()
     /// };
     /// # let _ = config;
     /// # }
     /// ```
-    pub idle_sec: u64,
+    pub receive_timeout: Duration,
 }
 
 impl Default for ClientConfig {
     fn default() -> Self {
         Self {
-            connect_sec: 30,
-            idle_sec: 30,
+            connect_timeout: Duration::from_secs(10),
+            receive_timeout: Duration::from_secs(30),
         }
     }
 }
 
-static CONFIG: RwLock<ClientConfig> = RwLock::new(ClientConfig {
-    connect_sec: 30,
-    idle_sec: 30,
-});
+static CONFIG: Lazy<RwLock<ClientConfig>> = Lazy::new(|| RwLock::new(ClientConfig::default()));
 
-/// Sets the global configuration.
+/// Set the global configuration.
 ///
 /// This function is recommended to only be called once during initialization.
 ///
@@ -95,7 +97,7 @@ pub fn set_config(config: ClientConfig) {
     *c = config;
 }
 
-/// Gets the global configuration.
+/// Get the global configuration.
 ///
 /// # Example
 /// ```rust
@@ -114,12 +116,12 @@ pub fn get_config() -> ClientConfig {
 
 /// A cheaper shortcut of
 /// ```rust,ignore
-/// get_config().connect_sec
+/// get_config().connect_timeout
 /// ```
 #[inline]
-pub fn get_connect_sec() -> u64 {
+pub fn get_connect_timeout() -> Duration {
     let c = CONFIG.read().unwrap();
-    (*c).connect_sec
+    (*c).connect_timeout
 }
 
 /// A cheaper shortcut of
@@ -127,7 +129,7 @@ pub fn get_connect_sec() -> u64 {
 /// get_config().idle_sec
 /// ```
 #[inline]
-pub fn get_idle_sec() -> u64 {
+pub fn get_receive_timeout() -> Duration {
     let c = CONFIG.read().unwrap();
-    (*c).idle_sec
+    (*c).receive_timeout
 }

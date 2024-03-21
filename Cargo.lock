@@ -61,9 +61,9 @@ checksum = "0952808a6c2afd1aa8947271f3a60f1a6763c7b912d210184c5149b5cf147247"
 
 [[package]]
 name = "async-trait"
-version = "0.1.77"
+version = "0.1.78"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c980ee35e870bd1a4d2c8294d4c04d0499e67bca1e4b5cefcc693c2fa00caea9"
+checksum = "461abc97219de0eaaf81fe3ef974a540158f3d079c2ab200f891f1a2ef201e85"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -504,6 +504,7 @@ version = "0.8.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "34af8d1a0e25924bc5b7c43c079c942339d8f0a8b57c39049bef581b46327404"
 dependencies = [
+ "libc",
  "rand_chacha",
  "rand_core",
 ]
@@ -529,9 +530,9 @@ dependencies = [
 
 [[package]]
 name = "reportme"
-version = "0.2.0"
+version = "0.2.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f5fc18b7408e5b94182f453b54d78cc01206ccaa8c19571137532b43ae7a318a"
+checksum = "7eeb21d4121310ff4f71c8557d18b72b82a1a8386aec91fd787569fec7a64310"
 dependencies = [
  "anyhow",
  "ureq",
@@ -566,6 +567,7 @@ dependencies = [
  "pkcs1",
  "pkcs8",
  "rand_core",
+ "sha2",
  "signature",
  "spki",
  "subtle",
@@ -669,9 +671,9 @@ dependencies = [
 
 [[package]]
 name = "smallvec"
-version = "1.13.1"
+version = "1.13.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e6ecd384b10a64542d77071bd64bd7b231f4ed5940fba55e98c3de13824cf3d7"
+checksum = "3c5e1a9a646d36c3599cd173a41282daf47c44583ad367b8e6837255952e5c67"
 
 [[package]]
 name = "socket2"
@@ -713,9 +715,9 @@ checksum = "81cdd64d312baedb58e21336b31bc043b77e01cc99033ce76ef539f78e965ebc"
 
 [[package]]
 name = "syn"
-version = "2.0.52"
+version = "2.0.53"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b699d15b36d1f02c3e7c69f8ffef53de37aefae075d8488d4ba1a7788d574a07"
+checksum = "7383cd0e49fff4b6b90ca5670bfd3e9d6a733b3f90c686605aa7eec8c4996032"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -726,28 +728,32 @@ dependencies = [
 name = "tcp-client"
 version = "0.1.1"
 dependencies = [
- "async-trait",
+ "bytes",
+ "once_cell",
  "reportme",
  "serde",
  "tcp-handler",
  "thiserror",
  "tokio",
+ "variable-len-reader",
 ]
 
 [[package]]
 name = "tcp-handler"
-version = "0.5.3"
+version = "1.0.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b40472ed6bdc71c4f0b63a46ad8394e9f58d4714c05a8724b89a7d12d7475f85"
+checksum = "06280f118989d826ddee06897d04cb198a08307f1924c7dab4bb03b1b75396cd"
 dependencies = [
  "aead",
  "aes-gcm",
+ "async-trait",
  "bytes",
  "flate2",
+ "once_cell",
+ "rand",
  "reportme",
  "rsa",
  "serde",
- "sha2",
  "thiserror",
  "tokio",
  "variable-len-reader",
@@ -890,9 +896,9 @@ dependencies = [
 
 [[package]]
 name = "variable-len-reader"
-version = "2.4.0"
+version = "3.2.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "95cec9549ffc43ff7f13e52cffc8c3eae9d32643a872a3ecde66a48769b3fff5"
+checksum = "d4f049623bd8e884b54ac4a89f8901b44ccb080a7868d31c5411ff30bec3914c"
 dependencies = [
  "bytes",
  "pin-project-lite",

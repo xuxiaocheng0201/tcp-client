@@ -14,21 +14,19 @@ keywords = ["tcp", "network", "client"]
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-async-trait = "~0.1"
+once_cell = "^1"
 thiserror = "^1"
-tokio = { version = "^1", features = ["macros", "net", "time", "sync"] }
-tcp-handler = "^1.0"
-serde = { version = "^1", features = ["derive"], optional = true }
-
-[features]
-default = []
-serde = ["dep:serde", "tcp-handler/serde"]
+tokio = { version = "^1", features = ["net"] }
+bytes = "^1"
+variable-len-reader = { version = "^3", default-features = false, features = ["std-comp", "sync_string"] }
+tcp-handler = { version = "^1.0", features = ["serde"] }
+serde = { version = "^1", features = ["derive"] }
 
 [build-dependencies]
 reportme = ">=0.2"
 
 [dev-dependencies]
-tokio = { version = "^1", features = ["rt-multi-thread"]}
+tokio = { version = "^1", features = ["macros", "rt-multi-thread"]}
 
 [profile.dev.package.num-bigint-dig]
 opt-level = 3

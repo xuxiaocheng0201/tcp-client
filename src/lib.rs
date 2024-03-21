@@ -1,35 +1,27 @@
 #![doc = include_str!("../README.md")]
-#![warn(missing_docs)]
-#![forbid(unsafe_code)]
 #![cfg_attr(docsrs, feature(doc_cfg))]
+#![forbid(unsafe_code)]
+#![warn(missing_docs)]
 
 pub mod config;
-pub mod network;
-pub mod mutable_cipher;
-pub mod client_base;
+pub mod errors;
 
-pub extern crate tokio;
+pub extern crate bytes;
 pub extern crate tcp_handler;
 
-use async_trait::async_trait;
-use tcp_handler::common::AesCipher;
-use tokio::net::{TcpStream, ToSocketAddrs};
-use crate::network::{NetworkError, start_client};
-
-/// The client factory to create clients.
+/// The main macro provided by this crate.
+///
 /// # Example
 /// ```rust,no_run
-/// use tcp_client::client_base::ClientBase;
-/// use tcp_client::client_factory;
-/// use tcp_client::ClientFactory;
-/// use tcp_client::network::NetworkError;
+/// use tcp_client::define_client;
+/// use tcp_client::errors::Result;
 ///
-/// client_factory!(MyClientFactory, MyClient, "MyTcpApplication");
+/// define_client!(pub CommonMyClient, MyClient, "MyTcpApplication");
 ///
 /// impl MyClient {
 ///     // define your method here.
 ///     // example:
-///     async fn my_method(&mut self) -> Result<(), NetworkError> {
+///     async fn my_method(&mut self) -> Result<()> {
 ///         self.check_func("my_method").await?;
 ///         // ...
 ///         Ok(())
@@ -38,93 +30,95 @@ use crate::network::{NetworkError, start_client};
 ///
 /// #[tokio::main]
 /// async fn main() {
-///     let mut client = MyClientFactory.connect("127.0.0.1:1234").await.unwrap();
+///     let mut client = MyClient::connect("127.0.0.1:1234").await.unwrap();
 ///     // use client.
 ///     // example:
 ///     client.my_method().await.unwrap();
 /// }
 /// ```
-#[async_trait]
-pub trait ClientFactory<C: From<(TcpStream, AesCipher)>> {
-    /// Get the identifier of your application.
-    /// # Note
-    /// This should be a const.
-    fn get_identifier(&self) -> &'static str;
-
-    /// Get the version of your application.
-    /// # Note
-    /// This should be a const.
-    /// # Example
-    /// ```rust,ignore
-    /// env!("CARGO_PKG_VERSION")
-    /// ```
-    fn get_version(&self) -> &'static str;
-
-    /// Build a new client.
-    async fn connect<A: ToSocketAddrs + Send>(&self, addr: A) -> Result<C, NetworkError> {
-        start_client(self, addr).await.map(|c| c.into())
-    }
-}
-
-/// Conveniently define a client factory.
-/// # Example
-/// ```rust,ignore
-/// use tcp_client::client_factory;
-///
-/// client_factory!(MyClientFactory, MyClient, "MyTcpApplication");
-/// ```
 #[macro_export]
-macro_rules! client_factory {
-    ($factory_vis: vis $factory: ident, $client_vis: vis $client: ident, $identifier: literal) => {
-        $factory_vis struct $factory;
+macro_rules! define_client {
+    ($vis: vis $client: ident, $tcp_client: ident, $identifier: literal) => {
+        define_client!(raw, $vis $client, $tcp_client, $identifier);
+    };
+    (raw, $vis: vis $client: ident, $tcp_client: ident, $identifier: literal) => {
+        define_client!(@@define raw, TcpClientHandlerRaw, $vis $client, $tcp_client, $identifier);
+    };
+    (compress_encrypt, $vis: vis $client: ident, $tcp_client: ident, $identifier: literal) => {
+        define_client!(@@define compress_encrypt, TcpClientHandlerCompressEncrypt, $vis $client, $tcp_client, $identifier);
+    };
+
+    (@@define $protocol: ident, $inner: ident, $vis: vis $client: ident, $tcp_client: ident, $identifier: literal) => {
         #[derive(Debug)]
-        $client_vis struct $client {
-            receiver: $crate::tokio::io::BufReader<$crate::tokio::net::tcp::OwnedReadHalf>,
-            sender: $crate::tokio::io::BufWriter<$crate::tokio::net::tcp::OwnedWriteHalf>,
-            cipher: $crate::mutable_cipher::MutableCipher,
+        $vis struct $client<R: ::tokio::io::AsyncRead + ::core::marker::Unpin, W: ::tokio::io::AsyncWrite + ::core::marker::Unpin> {
+            identifier: &'static str,
+            version: &'static str,
+            inner: ::tcp_handler::streams::$protocol::$inner<R, W>,
         }
-
-        impl $crate::ClientFactory<$client> for $factory {
-            fn get_identifier(&self) -> &'static str {
-                $identifier
+        #[allow(dead_code)]
+        impl<R: ::tokio::io::AsyncRead + ::core::marker::Unpin, W: ::tokio::io::AsyncWrite + ::core::marker::Unpin> $client<R, W> {
+            $vis async fn new(reader: R, writer: W) -> $crate::errors::Result<Self> {
+                let identifier = $identifier;
+                let version = env!("CARGO_PKG_VERSION");
+                let inner = ::tcp_handler::streams::$protocol::$inner::new(reader, writer, identifier, version).await?;
+                Ok(Self { identifier, version, inner })
+            }
+        }
+        #[allow(dead_code)]
+        impl<R: ::tokio::io::AsyncRead + ::core::marker::Unpin, W: ::tokio::io::AsyncWrite + ::core::marker::Unpin> $client<R, W> {
+            #[inline]
+            $vis fn get_identifier(&self) -> &'static str {
+                &self.identifier
             }
 
-            fn get_version(&self) -> &'static str {
-                env!("CARGO_PKG_VERSION")
+            #[inline]
+            $vis fn get_version(&self) -> &'static str {
+                &self.version
             }
-        }
-        impl From<($crate::tokio::net::TcpStream, $crate::tcp_handler::common::AesCipher)> for $client {
-            fn from(value: ($crate::tokio::net::TcpStream, $crate::tcp_handler::common::AesCipher)) -> Self {
-                let (receiver, sender)= value.0.into_split();
-                Self {
-                    receiver: $crate::tokio::io::BufReader::new(receiver),
-                    sender: $crate::tokio::io::BufWriter::new(sender),
-                    cipher: $crate::mutable_cipher::MutableCipher::new(value.1),
+
+            #[inline]
+            $vis async fn send<B: ::bytes::Buf>(&mut self, message: &mut B) -> $crate::errors::Result<()> {
+                self.inner.send(message).await.map_err(|e| e.into())
+            }
+
+            #[inline]
+            $vis async fn recv(&mut self) -> $crate::errors::Result<::bytes::BytesMut> {
+                self.inner.recv().await.map_err(|e| e.into())
+            }
+
+            #[inline]
+            $vis async fn send_recv<B: ::bytes::Buf>(&mut self, message: &mut B) -> $crate::errors::Result<::bytes::BytesMut> {
+                self.send(message).await?;
+                self.recv().await
+            }
+
+            $vis async fn check_func(&mut self, func: &str) -> $crate::errors::Result<()> {
+                use ::bytes::{Buf, BufMut};
+                use ::variable_len_reader::{VariableReader, VariableWriter};
+                let mut writer = ::bytes::BytesMut::new().writer();
+                writer.write_string(func)?;
+                let mut reader = self.send_recv(&mut writer.into_inner()).await?.reader();
+                if reader.read_bool()? {
+                    Ok(())
+                } else {
+                    Err($crate::errors::Error::ServerDenied)
                 }
             }
         }
-        impl $crate::client_base::ClientBase<$crate::tokio::io::BufReader<$crate::tokio::net::tcp::OwnedReadHalf>, $crate::tokio::io::BufWriter<$crate::tokio::net::tcp::OwnedWriteHalf>> for $client {
-            fn get_receiver<'a>(&'a mut self) -> (&'a mut $crate::tokio::io::BufReader<$crate::tokio::net::tcp::OwnedReadHalf>, &$crate::mutable_cipher::MutableCipher) {
-                (&mut self.receiver, &self.cipher)
-            }
-
-            fn get_sender<'a>(&'a mut self) -> (&'a mut $crate::tokio::io::BufWriter<$crate::tokio::net::tcp::OwnedWriteHalf>, &$crate::mutable_cipher::MutableCipher) {
-                (&mut self.sender, &self.cipher)
+        $vis type $tcp_client = $client<::tokio::io::BufReader<::tokio::net::tcp::OwnedReadHalf>, ::tokio::io::BufWriter<::tokio::net::tcp::OwnedWriteHalf>>;
+        #[allow(dead_code)]
+        impl $tcp_client {
+            $vis async fn connect<A: ::tokio::net::ToSocketAddrs>(addr: A) -> $crate::errors::Result<Self> {
+                let identifier = $identifier;
+                let version = env!("CARGO_PKG_VERSION");
+                let inner = ::tcp_handler::streams::$protocol::$inner::connect(addr, identifier, version).await?;
+                Ok(Self { identifier, version, inner })
             }
         }
     };
 }
 
-/// A shortcut for [`ClientFactory`].
-pub async fn quickly_connect<A: ToSocketAddrs + Send, C: From<(TcpStream, AesCipher)>>(identifier: &'static str, version:&'static str, addr: A) -> Result<C, NetworkError> {
-    struct TempClient(&'static str, &'static str);
-    impl ClientFactory<(TcpStream, AesCipher)> for TempClient {
-        fn get_identifier(&self) -> &'static str {
-            self.0
-        }
-        fn get_version(&self) -> &'static str {
-            self.1
-        }
-    }
-    TempClient(identifier, version).connect(addr).await.map(|c| c.into())
+#[cfg(test)]
+mod tests {
+    define_client!(DefaultClient, TcpDefaultClient, "DefaultClient");
 }
