@@ -28,12 +28,10 @@ tcp-client = "~0.1"
 # 示例
 
 ```rust,no_run
-use tcp_client::client_base::ClientBase;
-use tcp_client::client_factory;
-use tcp_client::ClientFactory;
-use tcp_client::network::NetworkError;
+use tcp_client::define_client;
+use tcp_client::errors::Result;
 
-client_factory!(MyClientFactory, MyClient, "MyTcpApplication");
+define_client!(pub CommonMyClient, MyClient, "MyTcpApplication");
 
 impl MyClient {
     // 在此处定义你的方法
@@ -47,7 +45,7 @@ impl MyClient {
 
 #[tokio::main]
 async fn main() {
-    let mut client = MyClientFactory.connect("127.0.0.1:1234").await.unwrap();
+    let mut client = MyClient::connect("127.0.0.1:1234").await.unwrap();
     // use client.
     // example:
     client.my_method().await.unwrap();
@@ -60,7 +58,18 @@ async fn main() {
 与 [tcp-server](https://crates.io/crates/tcp-server) 板条箱具有相同协议的版本。
 （推荐配套使用，否则可能会出现意料之外的BUG）
 
-| client version | server version |
-|----------------|----------------|
-| \>=0.1.0       | \>=0.2.0       |
-| <0.1.0         | <0.2.0         |
+| client version    | server version   |
+|-------------------|------------------|
+| \>=0.2.0          | \>=0.3.0         |
+| <0.2.0, \>=0.1.0  | <0.3.0 \>=0.2.0  |
+| <0.1.0            | <0.2.0           |
+
+
+# License
+
+Licensed under either of
+
+- Apache License, Version 2.0, ([LICENSE-APACHE](LICENSE-APACHE) or http://www.apache.org/licenses/LICENSE-2.0)
+- MIT license ([LICENSE-MIT](LICENSE-MIT) or http://opensource.org/licenses/MIT)
+
+at your option.

@@ -28,17 +28,15 @@ tcp-client = "~0.1"
 # Example
 
 ```rust,no_run
-use tcp_client::client_base::ClientBase;
-use tcp_client::client_factory;
-use tcp_client::ClientFactory;
-use tcp_client::network::NetworkError;
+use tcp_client::define_client;
+use tcp_client::errors::Result;
 
-client_factory!(MyClientFactory, MyClient, "MyTcpApplication");
+define_client!(pub CommonMyClient, MyClient, "MyTcpApplication");
 
 impl MyClient {
     // define your method here.
     // example:
-    async fn my_method(&mut self) -> Result<(), NetworkError> {
+    async fn my_method(&mut self) -> Result<()> {
         self.check_func("my_method").await?;
         // ...
         Ok(())
@@ -47,20 +45,30 @@ impl MyClient {
 
 #[tokio::main]
 async fn main() {
-    let mut client = MyClientFactory.connect("127.0.0.1:1234").await.unwrap();
+    let mut client = MyClient::connect("127.0.0.1:1234").await.unwrap();
     // use client.
     // example:
     client.my_method().await.unwrap();
 }
 ```
 
-
 # Version map
 
 Versions map to [tcp-server](https://crates.io/crates/tcp-server) with the same protocol.
 (Recommended for use in conjunction, otherwise unexpected bugs may occur.)
 
-| client version | server version |
-|----------------|----------------|
-| \>=0.1.0       | \>=0.2.0       |
-| <0.1.0         | <0.2.0         |
+| client version   | server version  |
+|------------------|-----------------|
+| \>=0.2.0         | \>=0.3.0        |
+| <0.2.0, \>=0.1.0 | <0.3.0 \>=0.2.0 |
+| <0.1.0           | <0.2.0          |
+
+
+# License
+
+Licensed under either of
+
+- Apache License, Version 2.0, ([LICENSE-APACHE](LICENSE-APACHE) or http://www.apache.org/licenses/LICENSE-2.0)
+- MIT license ([LICENSE-MIT](LICENSE-MIT) or http://opensource.org/licenses/MIT)
+
+at your option.
