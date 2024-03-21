@@ -66,7 +66,10 @@ macro_rules! define_client {
             $vis async fn new(reader: R, writer: W) -> $crate::errors::Result<Self> {
                 let identifier = $identifier;
                 let version = env!("CARGO_PKG_VERSION");
-                let inner = ::tcp_handler::streams::$protocol::$inner::new(reader, writer, identifier, version).await?;
+                let future = ::tcp_handler::streams::$protocol::$inner::new(reader, writer, identifier, version);
+                let timeout = $crate::config::get_connect_timeout();
+                let inner = ::tokio::time::timeout(timeout, future).await
+                    .map_err(|_| $crate::errors::Error::Timeout(true, timeout))??;
                 Ok(Self { identifier, version, inner })
             }
         }
@@ -89,7 +92,11 @@ macro_rules! define_client {
 
             #[inline]
             $vis async fn recv(&mut self) -> $crate::errors::Result<::bytes::BytesMut> {
-                self.inner.recv().await.map_err(|e| e.into())
+                let future = self.inner.recv();
+                let timeout = $crate::config::get_receive_timeout();
+                ::tokio::time::timeout(timeout, future).await
+                    .map_err(|_| $crate::errors::Error::Timeout(false, timeout))?
+                    .map_err(|e| e.into())
             }
 
             #[inline]
@@ -117,7 +124,10 @@ macro_rules! define_client {
             $vis async fn connect<A: ::tokio::net::ToSocketAddrs>(addr: A) -> $crate::errors::Result<Self> {
                 let identifier = $identifier;
                 let version = env!("CARGO_PKG_VERSION");
-                let inner = ::tcp_handler::streams::$protocol::$inner::connect(addr, identifier, version).await?;
+                let future = ::tcp_handler::streams::$protocol::$inner::connect(addr, identifier, version);
+                let timeout = $crate::config::get_connect_timeout();
+                let inner = ::tokio::time::timeout(timeout, future).await
+                    .map_err(|_| $crate::errors::Error::Timeout(true, timeout))??;
                 Ok(Self { identifier, version, inner })
             }
         }
