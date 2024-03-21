@@ -26,8 +26,8 @@ use once_cell::sync::Lazy;
 /// # let _ = config;
 /// # }
 /// ```
-#[derive(Debug, Copy, Clone, Eq, PartialEq, serde::Deserialize, serde::Serialize)]
-#[serde(default)]
+#[derive(Debug, Copy, Clone, Eq, PartialEq)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize), serde(default))]
 pub struct ClientConfig {
     /// `connect_timeout` is the timeout of connecting to the server.
     ///
