@@ -21,7 +21,7 @@ Add this to your `Cargo.toml`:
 
 ```toml
 [dependencies]
-tcp-client = "~0.1"
+tcp-client = "~0.2"
 ```
 
 

@@ -21,7 +21,7 @@ API [文档](https://docs.rs/tcp-client/)已完善。
 
 ```toml
 [dependencies]
-tcp-client = "~0.1"
+tcp-client = "~0.2"
 ```
 
 
@@ -46,8 +46,8 @@ impl MyClient {
 #[tokio::main]
 async fn main() {
     let mut client = MyClient::connect("127.0.0.1:1234").await.unwrap();
-    // use client.
-    // example:
+    // 就可以直接使用你的方法了
+    // 示例：
     client.my_method().await.unwrap();
 }
 ```
