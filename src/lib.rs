@@ -39,10 +39,16 @@ pub extern crate tcp_handler;
 #[macro_export]
 macro_rules! define_client {
     ($vis: vis $client: ident, $tcp_client: ident, $identifier: literal) => {
-        define_client!(raw, $vis $client, $tcp_client, $identifier);
+        define_client!(compress_encrypt, $vis $client, $tcp_client, $identifier);
     };
     (raw, $vis: vis $client: ident, $tcp_client: ident, $identifier: literal) => {
         define_client!(@@define raw, TcpClientHandlerRaw, $vis $client, $tcp_client, $identifier);
+    };
+    (compress, $vis: vis $client: ident, $tcp_client: ident, $identifier: literal) => {
+        define_client!(@@define compress, TcpClientHandlerCompress, $vis $client, $tcp_client, $identifier);
+    };
+    (encrypt, $vis: vis $client: ident, $tcp_client: ident, $identifier: literal) => {
+        define_client!(@@define encrypt, TcpClientHandlerEncrypt, $vis $client, $tcp_client, $identifier);
     };
     (compress_encrypt, $vis: vis $client: ident, $tcp_client: ident, $identifier: literal) => {
         define_client!(@@define compress_encrypt, TcpClientHandlerCompressEncrypt, $vis $client, $tcp_client, $identifier);
@@ -121,4 +127,9 @@ macro_rules! define_client {
 #[cfg(test)]
 mod tests {
     define_client!(DefaultClient, TcpDefaultClient, "DefaultClient");
+
+    define_client!(raw, RawClient, TcpRawClient, "RawClient");
+    define_client!(compress, CompressClient, TcpCompressClient, "CompressClient");
+    define_client!(encrypt, EncryptClient, TcpEncryptClient, "EncryptClient");
+    define_client!(compress_encrypt, CompressEncryptClient, TcpCompressEncryptClient, "CompressEncryptClient");
 }
